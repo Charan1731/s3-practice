@@ -68,6 +68,10 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
   });
 });
 
+    app.get('/', (req,res) => {
+      res.send("Hello world")
+    })
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
