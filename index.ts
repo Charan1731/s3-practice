@@ -72,7 +72,7 @@ app.use((error: any, req: express.Request, res: express.Response, next: express.
       res.send("Hello world")
     })
 
-app.listen(PORT, () => {
+app.listen(process.env.PORT || 3000, () => {
   console.log(`Server running on port ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/health`);
   console.log(`Upload endpoint: http://localhost:${PORT}/upload`);
