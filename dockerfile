@@ -1,32 +1,25 @@
-# Use the official Bun image
-FROM oven/bun:1
+# syntax=docker/dockerfile:1.6
 
-# Set working directory
+FROM oven/bun:1 AS base
+
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY package.json ./
+# Install dependencies (cached)
+COPY bun.lock package.json ./
+RUN bun install --ci
 
-# Install dependencies
-RUN bun install --frozen-lockfile
-
-# Copy source code and config
+# Copy application source
 COPY . .
 
-# Build TypeScript (if needed for production)
-RUN bun run build
+ENV NODE_ENV=production
+ENV PORT=3000
 
-# Create non-root user for security
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 bunuser
-USER bunuser
-
-# Expose the port (configurable via PORT env var, defaults to 3000)
 EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:${PORT:-3000}/health || exit 1
+# Run as non-root when available in the base image
+USER bun
 
-# Start the server in production mode
+# Start the server (Bun runs TypeScript directly)
 CMD ["bun", "run", "index.ts"]
+
+
