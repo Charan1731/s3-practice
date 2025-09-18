@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: blippi-backend
+    env: docker
+    rootDir: backend
+    plan: free
+    autoDeploy: true
+    pullRequestPreviewsEnabled: true
+    dockerfilePath: Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AWS_REGION
+        sync: false
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_BUCKET_NAME
+        sync: false
+
+
