@@ -145,7 +145,7 @@ app.post('/enhnaceContent', async (req,res) => {
     }
 
     const data = await response.json();
-    
+
     const safeData = data as GeminiResponse
     const enhancedPitch = safeData.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
@@ -157,6 +157,56 @@ app.post('/enhnaceContent', async (req,res) => {
   } catch (error) {
     return res.status(500).json({
       message:"Failed to Enhance the content"
+    })
+  }
+})
+
+app.post('sumarize', async (req,res) => {
+  try {
+
+    const apiKey = process.env.GEMINI_API;
+
+    if(!apiKey){
+      return res.status(404).json({
+        message:"Gemini API key is not found"
+      })
+    }
+
+    const {content} = req.body;
+
+    if(!content){
+      return res.status(400).json({
+        message:"Content is required"
+      })
+    }
+
+    const endpoint = new URL(GEMINI_API_ENDPOINT);
+    endpoint.searchParams.append('key', apiKey);
+
+    const response = await fetch(endpoint.toString(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      console.error('API error:', response.status, response.statusText);
+      return res.status(400).json({ isAppropriate: true, error: 'Content moderation service encountered an error. Your content has been accepted.' });
+    }
+
+    const data = await response.json();
+
+    const safeData = data as GeminiResponse
+    const enhancedPitch = safeData.candidates?.[0]?.content?.parts?.[0]?.text || '';
+
+    return res.status(200).json({
+      message:"Content sumarized successfully",
+      data:enhancedPitch
+    })
+  } catch (error) {
+    return res.status(500).json({
+      message:"Failed to sumarize the content"
     })
   }
 })
