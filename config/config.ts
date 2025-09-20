@@ -1,4 +1,4 @@
-import { S3Client } from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import multer, { type FileFilterCallback } from "multer";
 import multerS3 from "multer-s3";
 import dotenv from "dotenv";
@@ -9,6 +9,8 @@ dotenv.config();
 if (!process.env.AWS_REGION || !process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY || !process.env.AWS_BUCKET_NAME) {
   throw new Error('Missing required AWS environment variables');
 }
+
+const bucket = "printease"
 
 const s3 = new S3Client({
     region: process.env.AWS_REGION,
@@ -30,7 +32,6 @@ const fileFilter = (
     cb(new Error(`Invalid file type. Only ${allowedMimeTypes.join(', ')} are allowed.`));
   }
 };
-
 
 export const upload = multer({
     limits: { 
@@ -56,3 +57,22 @@ export const upload = multer({
     }),
     fileFilter,
 });
+
+const exportKey = (url: string) => {
+  const parts = url.split(".amazonaws.com/");
+  if (parts.length < 2) {
+    throw new Error("Invalid S3 URL: " + url);
+  }
+  return parts[1];
+}
+
+export const deleteImage = async (imageUrl: string) => {
+  try {
+
+    const key = exportKey(imageUrl)
+
+    await s3.send(new DeleteObjectCommand({Bucket:bucket, Key:key}))
+  } catch (error) {
+    console.log("Failed to delete image", error)
+  }
+}

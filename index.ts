@@ -1,5 +1,5 @@
 import express from 'express';
-import { upload } from './config/config';
+import { deleteImage, upload } from './config/config';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
@@ -54,6 +54,30 @@ app.post('/upload', upload.single('image'), (req, res) => {
     });
   }
 });
+
+app.delete('/delete', async (req,res) => {
+  try {
+
+    const {imageUrl} = req.body;
+
+    if(!imageUrl){
+      return res.status(404).json({
+        message:"Image URL is required"
+      })
+    }
+
+    const deleteKey = await deleteImage(imageUrl)
+
+    res.status(200).json({
+      message:"Image deleted"
+    })
+    
+  } catch (error) {
+    return res.status(500).json({
+      message:"Failed to delete image"
+    })
+  }
+})
 
 app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Server error:', error);
